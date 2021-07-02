@@ -564,8 +564,7 @@ class DataflowApplicationClient(object):
     if sdk_overrides:
       return dict(override_str.split(',', 1) for override_str in sdk_overrides)
 
-  # TODO(silviuc): Refactor so that retry logic can be applied.
-  @retry.no_retries  # Using no_retries marks this as an integration point.
+  @retry.with_exponential_backoff(retry_filter=retry.retry_on_server_errors_and_timeout_filter)
   def _gcs_file_copy(self, from_path, to_path):
     to_folder, to_name = os.path.split(to_path)
     total_size = os.path.getsize(from_path)
